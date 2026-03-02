@@ -140,4 +140,5 @@ if os.path.exists(static_path):
     print(f"✅ 挂载成功！地址: http://127.0.0.1:8000")
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
