@@ -22,7 +22,7 @@ app.add_middleware(
 
 # --- 配置与缓存初始化 ---
 DASHSCOPE_API_KEY = os.getenv("DASHSCOPE_API_KEY", "")
-CACHE_FILE = "resume_cache.json"
+CACHE_FILE = "/tmp/resume_cache.json"  # 在 Docker 环境中使用 /tmp 目录有写权限
 
 def get_file_hash(content):
     return hashlib.md5(content).hexdigest()
@@ -37,8 +37,11 @@ def load_cache():
     return {}
 
 def save_cache(cache_data):
-    with open(CACHE_FILE, "w", encoding="utf-8") as f:
-        json.dump(cache_data, f, ensure_ascii=False, indent=2)
+    try:
+        with open(CACHE_FILE, "w", encoding="utf-8") as f:
+            json.dump(cache_data, f, ensure_ascii=False, indent=2)
+    except:
+        pass
 
 resume_cache = load_cache()
 
@@ -55,7 +58,7 @@ def clean_text(text):
     text = re.sub(r'\n+', '\n', text)
     return text.strip()
 
-# --- 核心逻辑接口 ---
+# --- API 路由定义 (必须放在静态挂载之前) ---
 
 @app.post("/api/upload")
 async def upload_and_analyze(file: UploadFile = File(...)):
@@ -93,7 +96,11 @@ async def upload_and_analyze(file: UploadFile = File(...)):
 @app.post("/api/match")
 async def match_resume(resume_data: str = Form(...), job_description: str = Form(...)):
     try:
-        prompt = f"对比简历JSON和岗位JD，返回JSON：{{\"score\": 0-100, \"match_reason\": \"\"}}\n简历：{resume_data}\n需求：{job_description}"
+        prompt = f"""
+        对比简历JSON和岗位JD，返回JSON：{{"score": 0-100, "match_reason": ""}}
+        简历：{resume_data}
+        需求：{job_description}
+        """
         response = Generation.call(
             model='qwen-turbo',
             api_key=DASHSCOPE_API_KEY,
@@ -106,25 +113,24 @@ async def match_resume(resume_data: str = Form(...), job_description: str = Form
     except Exception as e:
         return {"error": str(e)}
 
-# --- 静态文件与首页路由逻辑 (502 终结者) ---
+# --- 静态文件处理 (终极版) ---
 
-# 获取当前 main.py 所在的绝对目录
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATIC_DIR = os.path.join(BASE_DIR, "static")
+# 获取当前 main.py 的绝对目录
+
+from fastapi.responses import HTMLResponse
 
 @app.get("/")
-async def read_index():
-    """强制首页返回 static/index.html"""
-    index_path = os.path.join(STATIC_DIR, "index.html")
-    if os.path.exists(index_path):
-        return FileResponse(index_path)
-    return {"status": "Backend is running", "error": f"Missing index.html in {STATIC_DIR}"}
+async def index():
+    # 直接读取文件内容并返回，绕过所有路径映射问题
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            content = f.read()
+        return HTMLResponse(content=content)
+    except Exception as e:
+        return {"error": f"读取失败，请确认 static/index.html 存在。错误: {str(e)}"}
 
-# 挂载静态资源目录
-if os.path.exists(STATIC_DIR):
-    app.mount("/static", StaticFiles(directory=STATIC_DIR, html=True), name="static")
-    print(f"✅ 静态文件挂载成功: {STATIC_DIR}")
+# 依然挂载 static 文件夹，方便加载 CSS/JS
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 if __name__ == "__main__":
-    # 强制使用 8080 端口以适配 Zeabur 网关
-    uvicorn.run(app, host="0.0.0.0", port=8080)
+    uvicorn.run(app, host="0.0.0.0", port=7860)
