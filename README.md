@@ -1,53 +1,51 @@
-🚀 AI 简历智能解析与岗位匹配系统
-本项目是一套基于 FastAPI 与 通义千问大模型 开发的招聘辅助工具，旨在实现简历自动化处理、结构化提取与智能化评分。
+# 🚀 AI 简历智能解析与岗位匹配系统
 
-🏗️ 项目架构 (Architecture)
-系统采用前后端分离架构，结合 AI 推理层实现高效处理：
+> **24小时挑战赛产出**：一套基于 **FastAPI** 与 **通义千问大模型** 的全栈式招聘辅助解决方案。
 
-前端 (Frontend)：HTML5 + TailwindCSS 响应式界面，实现简洁交互。
+[![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com/)
+[![AI Model](https://img.shields.io/badge/AI-Qwen--Turbo-blue?style=flat-square)](https://help.aliyun.com/document_detail/2712214.html)
+[![Deployment](https://img.shields.io/badge/Deployment-HuggingFace-FFD21E?style=flat-square&logo=huggingface)](https://huggingface.co/spaces)
+[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](https://opensource.org/licenses/MIT)
 
-后端 (Backend)：FastAPI 异步框架，负责路由分发与业务逻辑处理。
+---
 
-AI 层 (LLM)：集成 阿里通义千问 (Qwen-Turbo)，负责 JSON 结构化提取与逻辑匹配。
+## 🏗️ 项目架构 (Architecture)
+系统采用现代化云原生架构，确保了从解析到交互的高性能表现：
+- **前端 (Frontend)**：HTML5 + TailwindCSS 响应式设计，适配多端访问。
+- **后端 (Backend)**：FastAPI 异步架构，支持高效的并发请求处理。
+- **AI 引擎 (LLM)**：集成 **阿里通义千问 (Qwen-Turbo)**，实现简历文本到结构化 JSON 的深度映射。
+- **持久化与缓存**：自研 **MD5 文件哈希指纹** 技术，实现秒级响应的本地缓存逻辑，大幅降低 API 调用成本。
 
-存储与缓存 (Cache)：基于 MD5 哈希 的文件指纹持久化机制（模块四加分项实现）。
+---
 
-🛠️ 技术选型 (Tech Stack)
-核心语言：Python 3.10+
+## ✨ 功能实现清单 (Task Progress)
 
-后端框架：FastAPI (高性能异步框架)
+| 模块 | 功能描述 | 状态 | 技术实现要点 |
+| :--- | :--- | :--- | :--- |
+| **模块一/二** | 简历上传与解析 | ✅ 完成 | PyMuPDF (fitz) 高精度提取 + 文本清洗 |
+| **模块三** | 智能评分与匹配 | ✅ 完成 | 基于 AI 的语义对标与多维度匹配度评分 |
+| **模块四** | 结果缓存 (加分项) | ✅ 完成 | 基于文件哈希的 JSON 持久化存储机制 |
+| **模块五** | Web 交互页面 | ✅ 完成 | 响应式 UI + 自动化接口文档 (Swagger UI) |
 
-PDF 解析：PyMuPDF (fitz)，支持多页简历解析与文本清洗
+---
 
-AI 能力：阿里云百炼 - DashScope (Qwen-Turbo)
+## 🚀 访问与运行 (Quick Start)
 
-容器化/部署：Docker + Hugging Face Spaces (云原生托管)
+### 1. 线上演示 (验收推荐)
+- **Web 交互入口**: [点击访问演示页面](https://ceciliayyy-resume-tool-yk.hf.space/)
+- **API 自动化文档**: [访问 FastAPI Docs](https://ceciliayyy-resume-tool-yk.hf.space/docs)  
 
-✨ 功能模块实现情况 (Task Progress)
-✅ 模块一 & 二：简历上传与关键信息提取。支持 PDF 文本清洗，精准提取姓名、联系方式、教育背景等关键字段。
+### 2. 本地开发环境部署
+```bash
+# 1. 克隆并进入目录
+git clone <your-repo-url>
+cd resume-tool
 
-✅ 模块三：简历评分与匹配。支持输入岗位描述 (JD)，由 AI 生成匹配度评分（0-100）并提供匹配理由。
+# 2. 安装核心依赖
+pip install -r requirements.txt
 
-✅ 模块四 ：哈希指纹缓存。针对已解析文件实现秒级加载，大幅降低 API 调用成本。
+# 3. 设置环境变量 (请确保已获取 DashScope API Key)
+export DASHSCOPE_API_KEY="your_api_key_here"
 
-✅ 模块五：现代化 Web 交互页面。已部署至公网环境，支持线上验收。
-
-🚀 访问与运行 (Access & Run)
-1. 线上演示 (验收入口)
-Web 交互界面：https://ceciliayyy-resume-tool-yk.hf.space/
-
-API 自动化文档：https://ceciliayyy-resume-tool-yk.hf.space/docs 
-
-2. 本地运行
-配置环境变量 DASHSCOPE_API_KEY。
-
-执行 pip install -r requirements.txt。
-
-运行 python main.py，访问 http://localhost:7860。
-
-🔒 工程化说明
-环境隔离：通过 Dockerfile 确保开发与生产环境一致性。
-
-安全规范：使用环境变量管理 API Key，源代码完全脱敏，符合生产安全规范。
-
-异常处理：后端对 PDF 读取失败、AI 返回格式异常等场景均做了完善的 try-except 处理
+# 4. 启动服务
+python main.py
